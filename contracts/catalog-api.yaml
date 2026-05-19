@@ -1,0 +1,164 @@
+openapi: 3.0.3
+info:
+  title: AgriParts — Catalog Cell API
+  description: |
+    Contratto pubblico della Cell Catalogo Prodotti.
+    Fonte di verità per chiunque consumi le API del catalogo.
+    La Cell non espone nulla che non sia documentato qui.
+  version: 1.0.0
+  x-cell: catalog
+  x-port: 3001
+
+servers:
+  - url: http://localhost:3001
+
+paths:
+  /api/catalog/products:
+    get:
+      summary: Lista prodotti con filtri opzionali
+      operationId: listProducts
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: brand
+          in: query
+          schema: { type: string }
+        - name: q
+          in: query
+          schema: { type: string }
+          description: Ricerca full-text su nome, SKU, descrizione, compatibility
+        - name: stock
+          in: query
+          schema:
+            type: string
+            enum: [in_stock, low_stock, out_of_stock]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ProductSummary' }
+
+  /api/catalog/products/stock-check:
+    post:
+      summary: Verifica disponibilità batch per lista SKU
+      description: |
+        Usato dalla SPA prima del checkout per verificare che nessun prodotto
+        nel carrello sia out_of_stock. Le Cell non si chiamano direttamente —
+        è la SPA a orchestrare.
+      operationId: batchStockCheck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [skus]
+              properties:
+                skus:
+                  type: array
+                  items: { type: string }
+                  example: ["CAT-00001", "CAT-00015"]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items: { $ref: '#/components/schemas/StockStatus' }
+                  has_unavailable:
+                    type: boolean
+                    description: true se almeno un prodotto è out_of_stock
+
+  /api/catalog/products/{sku}:
+    get:
+      summary: Dettaglio prodotto
+      operationId: getProduct
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema: { type: string, pattern: '^CAT-\d{5}$' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProductDetail' }
+        '404':
+          description: Prodotto non trovato
+
+  /api/catalog/products/{sku}/stock:
+    get:
+      summary: Disponibilità singolo SKU
+      operationId: getStock
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StockStatus' }
+
+  /api/catalog/categories:
+    get:
+      summary: Lista categorie
+      operationId: listCategories
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Category' }
+
+components:
+  schemas:
+    ProductSummary:
+      type: object
+      properties:
+        sku: { type: string, example: CAT-00001 }
+        name: { type: string }
+        brand: { type: string }
+        category: { type: string }
+        price_cents:
+          type: integer
+          description: Prezzo di listino in centesimi
+        stock_level:
+          type: string
+          enum: [in_stock, low_stock, out_of_stock]
+        stock_qty: { type: integer }
+
+    ProductDetail:
+      allOf:
+        - $ref: '#/components/schemas/ProductSummary'
+        - type: object
+          properties:
+            description: { type: string }
+            compatibility:
+              type: array
+              items: { type: string }
+              description: Modelli macchina compatibili
+
+    StockStatus:
+      type: object
+      properties:
+        sku: { type: string }
+        stock_level:
+          type: string
+          enum: [in_stock, low_stock, out_of_stock]
+        stock_qty: { type: integer }
+        available: { type: boolean }
+
+    Category:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }

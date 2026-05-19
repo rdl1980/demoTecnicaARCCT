@@ -1,0 +1,188 @@
+openapi: 3.0.3
+info:
+  title: AgriParts — Orders Cell API
+  description: |
+    Contratto pubblico della Cell Gestione Ordini.
+    La Cell non conosce i dettagli del catalogo: SKU e prezzi
+    vengono passati dalla SPA al momento dell'operazione.
+  version: 1.0.0
+  x-cell: orders
+  x-port: 3002
+
+servers:
+  - url: http://localhost:3002
+
+paths:
+  /api/orders/cart:
+    get:
+      summary: Carrello corrente di demo-user
+      operationId: getCart
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+
+  /api/orders/cart/items:
+    post:
+      summary: Aggiunge prodotto al carrello
+      operationId: addCartItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddCartItemRequest' }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+
+  /api/orders/cart/items/{sku}:
+    delete:
+      summary: Rimuove prodotto dal carrello
+      operationId: removeCartItem
+      parameters:
+        - name: sku
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+
+  /api/orders/checkout:
+    post:
+      summary: Converte carrello in ordine
+      description: |
+        La SPA DEVE verificare lo stock tramite catalog/stock-check PRIMA
+        di chiamare questo endpoint. La Cell Orders non fa validazione stock.
+      operationId: checkout
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400':
+          description: Carrello vuoto
+
+  /api/orders:
+    get:
+      summary: Lista ordini di demo-user
+      operationId: listOrders
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/OrderSummary' }
+
+  /api/orders/{id}:
+    get:
+      summary: Dettaglio ordine
+      operationId: getOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '404':
+          description: Ordine non trovato
+
+  /api/orders/{id}/status:
+    patch:
+      summary: Aggiorna stato ordine
+      operationId: updateOrderStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [confirmed, shipped, delivered, cancelled]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '409':
+          description: Transizione di stato non consentita
+
+components:
+  schemas:
+    CartItem:
+      type: object
+      properties:
+        sku: { type: string }
+        product_name: { type: string }
+        quantity: { type: integer }
+        unit_price_cents: { type: integer }
+
+    Cart:
+      type: object
+      properties:
+        customer_id: { type: string }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CartItem' }
+        total_cents: { type: integer }
+
+    AddCartItemRequest:
+      type: object
+      required: [sku, product_name, quantity, unit_price_cents]
+      properties:
+        sku: { type: string }
+        product_name:
+          type: string
+          description: Passato dalla SPA, non recuperato dal catalogo
+        quantity: { type: integer, minimum: 1 }
+        unit_price_cents:
+          type: integer
+          description: Diventa price_snapshot
+
+    OrderLine:
+      type: object
+      properties:
+        sku: { type: string }
+        product_name: { type: string }
+        quantity: { type: integer }
+        unit_price_cents:
+          type: integer
+          description: price_snapshot — immutabile
+
+    OrderSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+        total_cents: { type: integer }
+        created_at: { type: string, format: date-time }
+        items_count: { type: integer }
+
+    Order:
+      allOf:
+        - $ref: '#/components/schemas/OrderSummary'
+        - type: object
+          properties:
+            lines:
+              type: array
+              items: { $ref: '#/components/schemas/OrderLine' }
