@@ -1,0 +1,17 @@
+{
+  "name": "agriparts",
+  "version": "1.0.0",
+  "description": "AgriParts — Cell Architecture demo",
+  "scripts": {
+    "install:all": "npm install && cd cell-catalog && npm install && cd ../cell-orders && npm install && cd ../frontend && npm install",
+    "db:init": "node scripts/init-db.js",
+    "dev": "concurrently \"npm run dev:catalog\" \"npm run dev:orders\" \"npm run dev:frontend\"",
+    "dev:catalog": "cd cell-catalog && node backend/index.js",
+    "dev:orders": "cd cell-orders && node backend/index.js",
+    "dev:frontend": "cd frontend && npm run dev",
+    "token-stats": "node scripts/token-stats.js"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
