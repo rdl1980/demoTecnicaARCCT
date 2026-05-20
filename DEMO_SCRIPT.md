@@ -2,7 +2,7 @@
 ### "Gli agenti AI senza confini diventano ingestibili"
 
 > **Durata**: 8-10 minuti | **Pubblico**: misto tecnico e business
-> **Setup richiesto**: progetto avviato (`npm run dev`), terminale visibile, browser aperto su localhost:5173
+> **Setup richiesto**: progetto avviato (`npm run dev`), terminale visibile, browser aperto su localhost:5200
 
 ---
 
@@ -10,16 +10,15 @@
 
 Esegui questi comandi prima che arrivi il pubblico:
 
-```bash
+```powershell
 # 1. Avvia tutto
 npm run dev
 
-# 2. Apri due terminali affiancati (li userai nello Scenario 3)
-# Terminale A → sarà il catalog-agent
-# Terminale B → sarà l'orders-agent
+# 2. Resetta i DB allo stato di demo (se necessario)
+npm run db:seed
 
-# 3. Apri il browser su localhost:5173
-# Aggiungi al carrello UN prodotto out_of_stock (puoi farlo manualmente nel DB)
+# 3. Apri il browser su localhost:5200
+# Aggiungi al carrello UN prodotto out_of_stock (CAT-00004 o CAT-00009)
 # così lo scenario 2 funziona immediatamente
 
 # 4. Tieni aperto il file MONOLITH_ANTI_PATTERN.md nel tuo editor
@@ -73,24 +72,30 @@ node scripts/token-stats.js
 
 > *"Il catalog-agent lavora con 280 token di contesto puro sul suo dominio. Il 43% di token in meno non è solo efficienza — è precisione. L'agente sa esattamente cosa può e non può fare."*
 
-**[Ora lancia il comando di aggiunta prodotto]**
+**[Ora lancia il comando di feature]**
 
 ```
-/project:catalog:add-product
-Filtro olio Fendt per trattore 942 Vario, SKU CAT-00021, prezzo €89,90, stock 12 pezzi, categoria Motore
+/catalog:feature
+Aggiungi il campo peso_kg al prodotto, visibile nel dettaglio prodotto
 ```
 
-**[Mentre l'agente lavora, mostra il terminale]**
+**[Mentre il catalog-lead lavora, mostra il terminale]**
 
-> *"Guardate cosa fa prima di scrivere una riga di codice: legge il CELL.md del catalogo, consulta il contratto OpenAPI. Sa che lo SKU deve essere CAT-XXXXX, sa che il prezzo va in centesimi, sa che deve aggiornare solo i file in cell-catalog/."*
+> *"Guardate cosa fa prima di scrivere una riga di codice: legge il CELL.md del catalogo, il contratto OpenAPI, lo schema del DB, le route esistenti. Poi produce un piano strutturato — DB, backend, frontend — e chiede approvazione prima di toccare un singolo file."*
 
-**[Quando appare il hook PostToolUse nel terminale]**
+**[Quando arriva il piano e la richiesta di approvazione]**
+
+> *"Eccolo: il piano dice che servono modifiche su tre layer. Approvo, e il lead dispatcha tre sub-agenti in parallelo — uno per il DB, uno per il backend, uno per il frontend. Ognuno riceve solo il contesto del suo layer."*
+
+**[Quando appaiono i hook PostToolUse nel terminale]**
 
 ```
-✅ [AgriParts] cell-catalog/db/seed.sql | Cell: cell-catalog
+✅ [AgriParts] cell-catalog/db/schema.sql | Cell: cell-catalog
+✅ [AgriParts] cell-catalog/backend/routes/catalog.js | Cell: cell-catalog
+✅ [AgriParts] frontend/src/catalog/ProductDetail.jsx | Cell: cell-catalog
 ```
 
-> *"Ogni file che tocca mostra la sua Cell di appartenenza. Non è uscito dal suo dominio neanche per un secondo."*
+> *"Ogni file che tocca mostra la sua Cell di appartenenza. Tre agenti, tre layer, zero uscite dal dominio."*
 
 **[Mostra il browser aggiornato con il nuovo prodotto nel catalogo]**
 
@@ -110,7 +115,7 @@ Cambia lo stato dell'ordine #3 in "shipped"
 
 **[Attendi la risposta dell'agente — dovrebbe rifiutare]**
 
-> *[Leggi ad alta voce la risposta dell'agente, che dovrebbe dire qualcosa tipo: "Non sono in grado di gestire ordini. Sono il Catalog Agent — il mio dominio è esclusivamente cell-catalog/. Per operazioni sugli ordini, usa orders-agent."]*
+> *[Leggi ad alta voce la risposta dell'agente, che dovrebbe dire qualcosa tipo: "Non sono in grado di gestire ordini. Il mio dominio è esclusivamente cell-catalog/. Per operazioni sugli ordini usa hld-agent per un'analisi cross-Cell."]*
 
 > *"Ecco il punto. Non è disciplina del developer che ha scritto il codice. È architettura. L'agente non può sbagliare Cell perché non ha le informazioni per farlo. Non conosce il database degli ordini, non conosce le API degli ordini, non conosce le regole di business degli ordini."*
 
@@ -135,7 +140,7 @@ Cambia lo stato dell'ordine #3 in "shipped"
 > *"Usiamo l'HLD Agent. Il suo ruolo è solo uno: leggere tutto il progetto e produrre un piano. Non scrive codice, non modifica file."*
 
 ```
-/project:hld
+/hld
 Voglio che quando un cliente fa checkout, l'app verifichi che ogni
 prodotto nel carrello abbia stock sufficiente per la quantità richiesta
 (non solo che sia in_stock, ma che la qty richiesta <= stock disponibile)
@@ -156,7 +161,7 @@ L'output atteso dal piano HLD:
 - cell-orders: NESSUNA MODIFICA — la logica resta nella SPA
 
 ### Modifiche al contratto OpenAPI
-- contracts/catalog-api.yaml
+- cell-catalog/contracts/catalog-api.yaml
   POST /api/catalog/products/stock-check
   Modifica request: aggiungere { sku, qty_requested } per ogni item
   Modifica response: aggiungere sufficient: boolean in StockStatus
@@ -172,34 +177,28 @@ L'output atteso dal piano HLD:
 - [ ] SPA: aggiorna logica pre-checkout con il nuovo campo
 ```
 
-> *"Il piano è pronto. Adesso due agenti lavorano in parallelo, ognuno sul suo pezzo."*
+> *"Il piano è pronto. Il catalog-lead analizza il piano e dispatcha i sub-agenti necessari in parallelo."*
 
-**[Apri il Terminale A — catalog-agent]**
+**[Nel terminale principale — lancia la feature]**
 
 ```
+/catalog:feature
 Implementa la modifica descritta nel piano HLD:
 aggiorna POST /api/catalog/products/stock-check per accettare
 qty_requested per ogni SKU e rispondere con sufficient: boolean
 ```
 
-**[Apri il Terminale B — orders-agent, CONTEMPORANEAMENTE]**
+> *"Il catalog-lead legge il piano, identifica i layer impattati — backend e frontend — e lancia backend-developer e frontend-developer in parallelo. Ognuno riceve solo il contesto del suo layer."*
 
-```
-Verifica che cell-orders non richieda modifiche per la feature
-di stock-check con quantità. Conferma che il checkout resti invariato
-e documenta il motivo nel CELL.md.
-```
-
-> *"Due agenti, due terminali, stesso progetto. Il catalog-agent sta modificando `cell-catalog/backend/routes/catalog.js` e `contracts/catalog-api.yaml`. L'orders-agent sta verificando che il suo dominio non sia impattato."*
-
-**[Mostra i hook PostToolUse su entrambi i terminali mentre scrivono]**
+**[Mostra i hook PostToolUse mentre i sub-agenti scrivono]**
 
 ```
 ✅ [AgriParts] cell-catalog/backend/routes/catalog.js | Cell: cell-catalog
-✅ [AgriParts] cell-orders/CELL.md | Cell: cell-orders
+✅ [AgriParts] cell-catalog/contracts/catalog-api.yaml | Cell: cell-catalog
+✅ [AgriParts] frontend/src/shared/CartWidget.jsx | Cell: cell-catalog
 ```
 
-> *"Guardate: Terminale A — tutto in `cell-catalog`. Terminale B — tutto in `cell-orders`. Non si sono mai parlati. Non si sono mai incrociati. Ognuno ha fatto il suo lavoro nel suo dominio."*
+> *"Guardate: tutto in `cell-catalog`. Il contratto OpenAPI è aggiornato contestualmente al backend — perché vive dentro la Cell, non in una cartella separata. Cell Orders non è stata toccata."*
 
 ---
 
@@ -232,7 +231,8 @@ e documenta il motivo nel CELL.md.
 ## Checklist pre-demo
 
 - [ ] `npm run dev` avviato, tutti e 3 i server attivi
-- [ ] Browser aperto su localhost:5173
+- [ ] `npm run db:seed` eseguito per DB in stato demo pulito
+- [ ] Browser aperto su localhost:5200
 - [ ] Carrello con almeno un prodotto `out_of_stock` per Scenario 2
 - [ ] Due terminali affiancati pronti per Scenario 3
 - [ ] `MONOLITH_ANTI_PATTERN.md` aperto nell'editor per l'apertura

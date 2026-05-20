@@ -5,7 +5,7 @@ Stai lavorando nella Cell Gestione Ordini.
 
 ## Primo passo obbligatorio
 1. Leggi cell-orders/CELL.md
-2. Consulta contracts/orders-api.yaml
+2. Consulta cell-orders/contracts/orders-api.yaml
 
 ## File di questa Cell
 - Backend: cell-orders/backend/

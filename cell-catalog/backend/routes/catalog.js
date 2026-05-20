@@ -59,12 +59,21 @@ router.get('/products', (req, res) => {
 
 // POST /api/catalog/products/stock-check
 router.post('/products/stock-check', (req, res) => {
-  const { skus } = req.body;
-  if (!Array.isArray(skus) || skus.length === 0) {
-    return res.status(400).json({ error: 'skus array required' });
+  const { items } = req.body;
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'items array required' });
+  }
+  for (const item of items) {
+    if (typeof item.sku !== 'string' || !item.sku) {
+      return res.status(400).json({ error: 'each item must have a sku string' });
+    }
+    if (!Number.isInteger(item.requested_qty) || item.requested_qty < 1) {
+      return res.status(400).json({ error: 'each item must have a requested_qty integer >= 1' });
+    }
   }
 
   const db = getDb();
+  const skus = items.map(i => i.sku);
   const placeholders = skus.map(() => '?').join(',');
   const rows = db.prepare(
     `SELECT sku, stock_qty FROM products WHERE sku IN (${placeholders})`
@@ -72,11 +81,14 @@ router.post('/products/stock-check', (req, res) => {
 
   const bysku = Object.fromEntries(rows.map(r => [r.sku, r]));
 
-  const results = skus.map(sku => {
+  const results = items.map(({ sku, requested_qty }) => {
     const row = bysku[sku];
-    if (!row) return { sku, stock_level: 'out_of_stock', stock_qty: 0, available: false };
+    if (!row) {
+      return { sku, stock_level: 'out_of_stock', stock_qty: 0, requested_qty, available: false };
+    }
     const level = stockLevel(row.stock_qty);
-    return { sku, stock_level: level, stock_qty: row.stock_qty, available: level !== 'out_of_stock' };
+    const available = row.stock_qty >= requested_qty;
+    return { sku, stock_level: level, stock_qty: row.stock_qty, requested_qty, available };
   });
 
   res.json({ results, has_unavailable: results.some(r => !r.available) });

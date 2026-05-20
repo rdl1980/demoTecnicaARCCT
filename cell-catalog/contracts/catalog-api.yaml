@@ -43,11 +43,11 @@ paths:
 
   /api/catalog/products/stock-check:
     post:
-      summary: Verifica disponibilità batch per lista SKU
+      summary: Verifica disponibilità batch per lista SKU con quantità richiesta
       description: |
         Usato dalla SPA prima del checkout per verificare che nessun prodotto
-        nel carrello sia out_of_stock. Le Cell non si chiamano direttamente —
-        è la SPA a orchestrare.
+        nel carrello abbia stock_qty < requested_qty. Le Cell non si chiamano
+        direttamente — è la SPA a orchestrare.
       operationId: batchStockCheck
       requestBody:
         required: true
@@ -55,12 +55,21 @@ paths:
           application/json:
             schema:
               type: object
-              required: [skus]
+              required: [items]
               properties:
-                skus:
+                items:
                   type: array
-                  items: { type: string }
-                  example: ["CAT-00001", "CAT-00015"]
+                  items:
+                    type: object
+                    required: [sku, requested_qty]
+                    properties:
+                      sku:
+                        type: string
+                        example: "CAT-00001"
+                      requested_qty:
+                        type: integer
+                        minimum: 1
+                        example: 3
       responses:
         '200':
           content:
@@ -73,7 +82,7 @@ paths:
                     items: { $ref: '#/components/schemas/StockStatus' }
                   has_unavailable:
                     type: boolean
-                    description: true se almeno un prodotto è out_of_stock
+                    description: true se almeno un item ha stock_qty < requested_qty
 
   /api/catalog/products/{sku}:
     get:
@@ -155,6 +164,9 @@ components:
           type: string
           enum: [in_stock, low_stock, out_of_stock]
         stock_qty: { type: integer }
+        requested_qty:
+          type: integer
+          description: Echo della quantità richiesta dal chiamante
         available: { type: boolean }
 
     Category:

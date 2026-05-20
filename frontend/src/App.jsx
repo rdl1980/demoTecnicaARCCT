@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import CatalogPage from './components/CatalogPage';
-import OrdersPage from './components/OrdersPage';
-import CartWidget from './components/CartWidget';
+import Navbar from './shared/Navbar';
+import CatalogPage from './catalog/CatalogPage';
+import OrdersPage from './orders/OrdersPage';
+import CartWidget from './shared/CartWidget';
 
 export default function App() {
   const [cartOpen, setCartOpen] = useState(false);

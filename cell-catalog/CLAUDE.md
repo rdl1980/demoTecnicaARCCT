@@ -5,7 +5,7 @@ Stai lavorando nella Cell Catalogo Prodotti.
 
 ## Primo passo obbligatorio
 1. Leggi cell-catalog/CELL.md
-2. Consulta contracts/catalog-api.yaml
+2. Consulta cell-catalog/contracts/catalog-api.yaml
 
 ## File di questa Cell
 - Backend: cell-catalog/backend/

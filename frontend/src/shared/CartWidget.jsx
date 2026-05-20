@@ -8,7 +8,7 @@ export default function CartWidget({ onClose, onCartChange, cartVersion }) {
   const [cart, setCart]             = useState({ items: [], total_cents: 0 });
   const [checking, setChecking]     = useState(false);
   const [error, setError]           = useState(null);
-  const [unavailable, setUnavailable] = useState([]);
+  const [unavailable, setUnavailable] = useState([]); // [{ sku, stock_qty, requested_qty }]
 
   function loadCart() {
     fetch('/api/orders/cart')
@@ -31,18 +31,18 @@ export default function CartWidget({ onClose, onCartChange, cartVersion }) {
     setUnavailable([]);
 
     try {
-      const skus = cart.items.map(i => i.sku);
+      const items = cart.items.map(i => ({ sku: i.sku, requested_qty: i.quantity }));
       const stockRes = await fetch('/api/catalog/products/stock-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ skus }),
+        body: JSON.stringify({ items }),
       });
       const stockData = await stockRes.json();
 
       if (stockData.has_unavailable) {
-        const outSkus = stockData.results.filter(r => !r.available).map(r => r.sku);
-        setUnavailable(outSkus);
-        setError('Alcuni prodotti non sono disponibili. Rimuovili dal carrello per procedere.');
+        const insufficient = stockData.results.filter(r => !r.available);
+        setUnavailable(insufficient);
+        setError('Stock insufficiente per alcuni prodotti. Modifica le quantità per procedere.');
         setChecking(false);
         return;
       }
@@ -85,7 +85,8 @@ export default function CartWidget({ onClose, onCartChange, cartVersion }) {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {cart.items.map(item => {
-                const isUnavail = unavailable.includes(item.sku);
+                const unavailInfo = unavailable.find(u => u.sku === item.sku);
+                const isUnavail = !!unavailInfo;
                 return (
                   <div key={item.sku} className="card" style={{
                     border: isUnavail ? '2px solid var(--red)' : undefined,
@@ -105,7 +106,11 @@ export default function CartWidget({ onClose, onCartChange, cartVersion }) {
                         € {((item.quantity * item.unit_price_cents) / 100).toFixed(2).replace('.', ',')}
                       </span>
                     </div>
-                    {isUnavail && <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>Prodotto non disponibile</div>}
+                    {isUnavail && (
+                      <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>
+                        Stock insufficiente: richiesti {unavailInfo.requested_qty}, disponibili {unavailInfo.stock_qty}
+                      </div>
+                    )}
                   </div>
                 );
               })}

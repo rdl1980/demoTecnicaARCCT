@@ -23,7 +23,7 @@ NON conosce i dettagli del catalogo (solo SKU e prezzo passati dalla SPA).
 7. customer_id per la demo: sempre demo-user
 
 ## API Contract
-Contratto completo: contracts/orders-api.yaml
+Contratto completo: cell-orders/contracts/orders-api.yaml
 Endpoint:
 - GET    /api/orders/cart
 - POST   /api/orders/cart/items

@@ -20,7 +20,7 @@ NON gestisce prezzi promozionali, ordini, carrello o utenti.
 5. Prezzo esposto = prezzo di listino in centesimi, senza sconti
 
 ## API Contract
-Contratto completo: contracts/catalog-api.yaml
+Contratto completo: cell-catalog/contracts/catalog-api.yaml
 Endpoint:
 - GET  /api/catalog/products
 - GET  /api/catalog/products/:sku

@@ -6,7 +6,8 @@
       "Read(cell-catalog/**)",
       "Read(cell-orders/**)",
       "Read(frontend/**)",
-      "Read(contracts/**)",
+      "Read(cell-catalog/contracts/**)",
+      "Read(cell-orders/contracts/**)",
       "Write(cell-catalog/**)",
       "Write(cell-orders/**)",
       "Write(frontend/**)"
