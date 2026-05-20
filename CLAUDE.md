@@ -19,15 +19,9 @@ Non leggere i CELL.md delle altre Cell.
 - Init DB:        npm run db:init
 - Token stats:    node scripts/token-stats.js
 
-## Orchestrazione inter-Cell
-Le Cell NON si chiamano direttamente.
-La SPA è l'unico orchestratore.
-Esempio: pre-checkout → SPA chiama catalog/stock-check → poi orders/checkout.
-
 ## Agenti disponibili
 - hld-agent:     analisi cross-Cell, read-only, produce piano HLD
-- catalog-agent: lavora solo in cell-catalog/
-- orders-agent:  lavora solo in cell-orders/
+- catalog-lead: lavora solo in cell-catalog/
 
 ## Ambiente utente
 - OS: Windows — fornire sempre script PowerShell, mai comandi bash/sh
