@@ -3,3 +3,5 @@ come utente che effettua un ordine voglio poter vedere per ogni prodotto lo scon
 Acceptance criteria:
 - la percentuale di sconto deve essere salvata come proprietà del singolo prodotto a sistema
 - In fase di acquisto devo poter vedere sia il prezzo origina che lo sconto applicato e il prezzo finale
+- Lo sconto deve essere visibile anche sul catalogo
+- lo sconto deve essere persistito in decimale
