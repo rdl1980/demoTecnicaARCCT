@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function priceFmt(cents) {
   return `€ ${(cents / 100).toFixed(2).replace('.', ',')}`;
 }
 
 export default function ProductDetail({ product, onClose, onAddToCart }) {
+  const [qty, setQty] = useState(1);
   if (!product) return null;
   const isOut = product.stock_level === 'out_of_stock';
 
@@ -60,9 +61,39 @@ export default function ProductDetail({ product, onClose, onAddToCart }) {
               </span>
             )}
           </div>
-          <button className="btn-primary" disabled={isOut} onClick={() => { onAddToCart(product); onClose(); }}>
-            {isOut ? 'Esaurito' : '+ Aggiungi al carrello'}
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+              <button
+                disabled={isOut || qty <= 1}
+                onClick={() => setQty(q => Math.max(1, q - 1))}
+                style={{ width: 36, height: 36, background: 'var(--bg3)', border: 'none', cursor: isOut || qty <= 1 ? 'not-allowed' : 'pointer', fontSize: 18, lineHeight: 1, color: 'var(--text)' }}
+              >−</button>
+              <input
+                type="number"
+                min={1}
+                max={99}
+                value={qty}
+                disabled={isOut}
+                onChange={e => {
+                  const v = parseInt(e.target.value, 10);
+                  if (!isNaN(v)) setQty(Math.min(99, Math.max(1, v)));
+                }}
+                style={{ width: 48, height: 36, border: 'none', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', textAlign: 'center', background: 'var(--bg2)', color: 'var(--text)', fontSize: 15 }}
+              />
+              <button
+                disabled={isOut || qty >= 99}
+                onClick={() => setQty(q => Math.min(99, q + 1))}
+                style={{ width: 36, height: 36, background: 'var(--bg3)', border: 'none', cursor: isOut || qty >= 99 ? 'not-allowed' : 'pointer', fontSize: 18, lineHeight: 1, color: 'var(--text)' }}
+              >+</button>
+            </div>
+            <button
+              className="btn-primary"
+              disabled={isOut}
+              onClick={() => { onAddToCart(product, qty); setQty(1); onClose(); }}
+            >
+              {isOut ? 'Esaurito' : '+ Aggiungi al carrello'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

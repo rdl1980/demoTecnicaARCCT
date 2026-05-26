@@ -39,14 +39,14 @@ export default function CatalogPage({ onCartChange }) {
       .catch(() => setDetailFull(product));
   }
 
-  function addToCart(product) {
+  function addToCart(product, quantity) {
     fetch('/api/orders/cart/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         sku: product.sku,
         product_name: product.name,
-        quantity: 1,
+        quantity,
         unit_price_cents: product.price_cents,
         ...(product.discount_pct != null && { discount_pct: product.discount_pct }),
       }),
