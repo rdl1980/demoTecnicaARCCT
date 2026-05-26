@@ -69,14 +69,14 @@ export default function ProductDetail({ product, onClose, onAddToCart }) {
                 style={{ width: 36, height: 36, background: 'var(--bg3)', border: 'none', cursor: isOut || qty <= 1 ? 'not-allowed' : 'pointer', fontSize: 18, lineHeight: 1, color: 'var(--text)' }}
               >−</button>
               <input
-                type="number"
-                min={1}
-                max={99}
+                type="text"
+                inputMode="numeric"
                 value={qty}
                 disabled={isOut}
                 onChange={e => {
                   const v = parseInt(e.target.value, 10);
                   if (!isNaN(v)) setQty(Math.min(99, Math.max(1, v)));
+                  else if (e.target.value === '') setQty(1);
                 }}
                 style={{ width: 48, height: 36, border: 'none', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', textAlign: 'center', background: 'var(--bg2)', color: 'var(--text)', fontSize: 15 }}
               />
