@@ -1,19 +1,19 @@
 # AgriParts — Cell Architecture Demo
 
-Una demo funzionale di **architettura cell-based** per un e-commerce di ricambi agricoli. Ogni "cell" è una fetta verticale completamente isolata con il proprio database, backend e contratto API OpenAPI 3.0.
+A functional demo of **cell-based architecture** for an agricultural parts e-commerce. Each "cell" is a fully isolated vertical slice with its own database, backend, and OpenAPI 3.0 contract.
 
-## 🎯 Cosa è questo progetto?
+## 🎯 What is this project?
 
-AgriParts dimostra come progettare sistemi scalabili usando il **Cell Pattern**:
-- **Isolamento**: Ogni cell ha database indipendente (SQLite)
-- **Autonomia**: Le cell non si chiamano mai direttamente; il frontend le orchiestra
-- **Contratti espliciti**: OpenAPI 3.0 per ogni cell definisce il confine
-- **Denormalizzazione intelligente**: Il frontend passa prezzo/nome nel carrello; la cell-orders non dipende da catalog
+AgriParts demonstrates how to design scalable systems using the **Cell Pattern**:
+- **Isolation**: Each cell has an independent database (SQLite)
+- **Autonomy**: Cells never call each other directly; the frontend orchestrates across them
+- **Explicit contracts**: OpenAPI 3.0 per cell defines the boundary
+- **Intentional denormalization**: The frontend passes price/name into the cart; cell-orders has no dependency on catalog
 
-## 📦 Architettura
+## 📦 Architecture
 
 ```
-cell-catalog/        → Catalogo prodotti (porta 3001)
+cell-catalog/        → Product catalog (port 3001)
   ├── backend/
   │   ├── index.js
   │   ├── db.js (SQLite)
@@ -21,7 +21,7 @@ cell-catalog/        → Catalogo prodotti (porta 3001)
   ├── contracts/catalog-api.yaml
   └── db/schema.sql + seed
 
-cell-orders/         → Carrello & Ordini (porta 3002)
+cell-orders/         → Cart & Orders (port 3002)
   ├── backend/
   │   ├── index.js
   │   ├── db.js (SQLite)
@@ -29,126 +29,126 @@ cell-orders/         → Carrello & Ordini (porta 3002)
   ├── contracts/orders-api.yaml
   └── db/schema.sql + seed
 
-frontend/            → React + Vite SPA (porta 5200)
+frontend/            → React + Vite SPA (port 5200)
   ├── src/
   │   ├── catalog/
   │   ├── orders/
   │   └── shared/
   └── vite.config.js
 
-scripts/             → Utilità per init/seed database
+scripts/             → DB init/seed utilities
 ```
 
 ## 🚀 Quick Start
 
-### Prerequisiti
+### Prerequisites
 - Node.js 22+
 - npm 10+
 
-### Installazione e Setup
+### Installation & Setup
 
 ```bash
-# 1. Installa dipendenze (root + tutte le cell + frontend)
+# 1. Install dependencies (root + all cells + frontend)
 npm run install:all
 
-# 2. Inizializza i database (esegui una sola volta)
+# 2. Initialize databases (run once)
 npm run db:init
 
-# 3. Popola i database con dati demo
+# 3. Populate databases with demo data
 npm run db:seed
 
-# 4. Avvia tutto in concorrenza
+# 4. Start everything
 npm run dev
 ```
 
-L'applicazione sarà disponibile su:
+The application will be available at:
 - **Frontend**: http://localhost:5200
 - **Catalog API**: http://localhost:3001
 - **Orders API**: http://localhost:3002
 
-### Comandi disponibili
+### Available commands
 
 ```bash
-npm run install:all      # Installa dipendenze ovunque
-npm run db:init          # Crea gli schema dei database
-npm run db:seed          # Popola i database con seed
-npm run dev              # Avvia tutto (catalog, orders, frontend)
-npm run dev:catalog      # Solo cell-catalog
-npm run dev:orders       # Solo cell-orders
-npm run dev:frontend     # Solo SPA frontend
-npm run token-stats      # Analizza token usage monolith vs cell
+npm run install:all      # Install dependencies everywhere
+npm run db:init          # Create database schemas
+npm run db:seed          # Populate databases with seed data
+npm run dev              # Start everything (catalog, orders, frontend)
+npm run dev:catalog      # cell-catalog only
+npm run dev:orders       # cell-orders only
+npm run dev:frontend     # SPA frontend only
+npm run token-stats      # Analyze token usage monolith vs cell
 ```
 
-## 📚 Struttura Dominio
+## 📚 Domain Structure
 
 ### Cell: Catalog (cell-catalog/)
 
-Gestisce il catalogo prodotti con ricerca, filtri e verifiche di stock.
+Manages the product catalog with search, filters, and stock verification.
 
-**Modello di Dominio:**
-- **Product**: Pezzo di ricambio con SKU univoco (formato: CAT-XXXXX)
-- **Category**: Raggruppamento logico (Motore, Idraulica, Trasmissione, Elettrica, Carrozzeria)
-- **Brand**: Produttore (SAME, Deutz-Fahr, Fendt, John Deere, New Holland, Lamborghini Trattori)
-- **Compatibility**: Modelli di macchina compatibili con il prodotto
+**Domain Model:**
+- **Product**: Spare part with a unique SKU (format: CAT-XXXXX)
+- **Category**: Logical grouping (Engine, Hydraulics, Transmission, Electrical, Body)
+- **Brand**: Manufacturer (SAME, Deutz-Fahr, Fendt, John Deere, New Holland, Lamborghini Trattori)
+- **Compatibility**: Machine models compatible with the product
 - **StockLevel**: in_stock | low_stock (qty < 5) | out_of_stock (qty = 0)
 
 **API Endpoints:**
 ```
-GET    /api/catalog/products              # Lista prodotti con filtri
-GET    /api/catalog/products/:sku         # Dettagli prodotto
-GET    /api/catalog/categories            # Liste di categorie
-GET    /api/catalog/products/:sku/stock   # Livello stock
-POST   /api/catalog/products/stock-check  # Verifica batch pre-checkout
+GET    /api/catalog/products              # List products with filters
+GET    /api/catalog/products/:sku         # Product details
+GET    /api/catalog/categories            # Category list
+GET    /api/catalog/products/:sku/stock   # Stock level
+POST   /api/catalog/products/stock-check  # Batch pre-checkout stock check
 ```
 
-**Confini della Cell:**
-- ✅ Gestisce: Prodotti, categorie, brand, compatibilità, stock
-- ❌ Non gestisce: Sconti, ordini, carrello, utenti, autenticazione
+**Cell Boundaries:**
+- ✅ Owns: Products, categories, brands, compatibility, stock
+- ❌ Does NOT own: Discounts, orders, cart, users, authentication
 
-Vedi [cell-catalog/CELL.md](cell-catalog/CELL.md) per dettagli.
+See [cell-catalog/CELL.md](cell-catalog/CELL.md) for details.
 
 ### Cell: Orders (cell-orders/)
 
-Gestisce carrello, checkout e ciclo di vita degli ordini.
+Manages cart, checkout, and order lifecycle.
 
-**Modello di Dominio:**
-- **Cart**: Raccolta temporanea di CartItem per customer
-- **CartItem**: SKU, quantità, prezzo snapshot, nome prodotto
-- **Order**: Carrello confermato e immutabile
-- **OrderLine**: Riga di un ordine confermato
-- **OrderStatus**: pending → confirmed → shipped → delivered (oppure cancelled)
+**Domain Model:**
+- **Cart**: Temporary collection of CartItems per customer
+- **CartItem**: SKU, quantity, price snapshot, product name
+- **Order**: Confirmed and immutable cart
+- **OrderLine**: Line item of a confirmed order
+- **OrderStatus**: pending → confirmed → shipped → delivered (or cancelled)
 
 **API Endpoints:**
 ```
-GET    /api/orders/cart               # Recupera carrello attuale
-POST   /api/orders/cart/items         # Aggiunge prodotto al carrello
-DELETE /api/orders/cart/items/:sku    # Rimuove dal carrello
-POST   /api/orders/checkout           # Conferma e crea ordine
-GET    /api/orders                    # Lista ordini del customer
-GET    /api/orders/:id                # Dettagli ordine
-PATCH  /api/orders/:id/status         # Cambia stato ordine
+GET    /api/orders/cart               # Get current cart
+POST   /api/orders/cart/items         # Add product to cart
+DELETE /api/orders/cart/items/:sku    # Remove from cart
+POST   /api/orders/checkout           # Confirm and create order
+GET    /api/orders                    # List customer orders
+GET    /api/orders/:id                # Order details
+PATCH  /api/orders/:id/status         # Update order status
 ```
 
-**Regole di Business:**
-- Il carrello → ordine solo tramite checkout
-- Il prezzo è congelato al momento dell'ordine (price_snapshot immutabile)
-- La cell NON valida stock; la SPA chiama catalog/stock-check prima del checkout
+**Business Rules:**
+- Cart → Order only via checkout
+- Price is frozen at order time (price_snapshot immutable)
+- Cell does NOT validate stock; SPA calls catalog/stock-check before checkout
 - Demo: customer_id = "demo-user"
 
-**Confini della Cell:**
-- ✅ Gestisce: Carrello, ordini, status
-- ❌ Non gestisce: Catalogo, ricerca, dettagli prodotto, autenticazione
+**Cell Boundaries:**
+- ✅ Owns: Cart, orders, status transitions
+- ❌ Does NOT own: Catalog, search, product details, authentication
 
-Vedi [cell-orders/CELL.md](cell-orders/CELL.md) per dettagli.
+See [cell-orders/CELL.md](cell-orders/CELL.md) for details.
 
 ## 💾 Database
 
 ### cell-catalog/db/catalog.db
 ```sql
-products              # SKU, nome, descrizione, prezzo, categoria, brand
-categories            # ID, nome
-brands                # ID, nome
-product_compatibility # Modelli di macchina compatibili
+products              # SKU, name, description, price, category, brand
+categories            # ID, name
+brands                # ID, name
+product_compatibility # Compatible machine models
 ```
 
 ### cell-orders/db/orders.db
@@ -159,7 +159,7 @@ orders                # ID, customer_id, status, total, created_at
 order_lines           # ID, order_id, sku, quantity, unit_price
 ```
 
-Tutti i prezzi sono **interi in centesimi** (es: €19,99 = 1999 centesimi).
+All prices are **integer cents** (e.g. €19.99 = 1999 cents).
 
 ## 🔧 Technology Stack
 
@@ -217,9 +217,9 @@ git push origin feature/my-feature-name
 
 ## 📖 Additional Documentation
 
-- [cell-catalog/CELL.md](cell-catalog/CELL.md) — Dominio Catalog
-- [cell-orders/CELL.md](cell-orders/CELL.md) — Dominio Orders
-- [CLAUDE.md](CLAUDE.md) — Linee guida di sviluppo
+- [cell-catalog/CELL.md](cell-catalog/CELL.md) — Catalog cell domain
+- [cell-orders/CELL.md](cell-orders/CELL.md) — Orders cell domain
+- [CLAUDE.md](CLAUDE.md) — Development guidelines
 - OpenAPI: [cell-catalog/contracts/catalog-api.yaml](cell-catalog/contracts/catalog-api.yaml)
 - OpenAPI: [cell-orders/contracts/orders-api.yaml](cell-orders/contracts/orders-api.yaml)
 
