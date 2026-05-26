@@ -18,8 +18,9 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT,
   category_id INTEGER NOT NULL REFERENCES categories(id),
   brand_id    INTEGER NOT NULL REFERENCES brands(id),
-  price_cents INTEGER NOT NULL CHECK(price_cents > 0),
-  stock_qty   INTEGER NOT NULL DEFAULT 0 CHECK(stock_qty >= 0),
+  price_cents  INTEGER NOT NULL CHECK(price_cents > 0),
+  discount_pct REAL    CHECK(discount_pct IS NULL OR (discount_pct >= 0.0 AND discount_pct <= 1.0)),
+  stock_qty    INTEGER NOT NULL DEFAULT 0 CHECK(stock_qty >= 0),
   stock_level TEXT    NOT NULL DEFAULT 'out_of_stock'
                 CHECK(stock_level IN ('in_stock','low_stock','out_of_stock'))
 );

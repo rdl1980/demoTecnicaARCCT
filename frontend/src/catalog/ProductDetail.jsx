@@ -39,9 +39,27 @@ export default function ProductDetail({ product, onClose, onAddToCart }) {
           </div>
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
-          <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)', fontFamily: "'Barlow Condensed', sans-serif" }}>
-            {priceFmt(product.price_cents)}
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {product.discount_pct != null ? (
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 16, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                    {priceFmt(product.price_cents)}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#fff', background: 'var(--red)', borderRadius: 4, padding: '2px 7px' }}>
+                    -{Math.round(product.discount_pct * 100)}%
+                  </span>
+                </div>
+                <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)', fontFamily: "'Barlow Condensed', sans-serif" }}>
+                  {priceFmt(Math.round(product.price_cents * (1 - product.discount_pct)))}
+                </span>
+              </>
+            ) : (
+              <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--accent)', fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {priceFmt(product.price_cents)}
+              </span>
+            )}
+          </div>
           <button className="btn-primary" disabled={isOut} onClick={() => { onAddToCart(product); onClose(); }}>
             {isOut ? 'Esaurito' : '+ Aggiungi al carrello'}
           </button>

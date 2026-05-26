@@ -134,6 +134,8 @@ components:
         product_name: { type: string }
         quantity: { type: integer }
         unit_price_cents: { type: integer }
+        discount_pct: { type: number, nullable: true }
+        final_price_cents: { type: integer }
 
     Cart:
       type: object
@@ -156,6 +158,10 @@ components:
         unit_price_cents:
           type: integer
           description: Diventa price_snapshot
+        discount_pct:
+          type: number
+          nullable: true
+          description: Sconto percentuale (0.00–1.00), passato dalla SPA dal catalogo
 
     OrderLine:
       type: object
@@ -166,6 +172,8 @@ components:
         unit_price_cents:
           type: integer
           description: price_snapshot — immutabile
+        discount_pct: { type: number, nullable: true }
+        final_price_cents: { type: integer }
 
     OrderSummary:
       type: object

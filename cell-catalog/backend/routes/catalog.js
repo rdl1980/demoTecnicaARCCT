@@ -12,13 +12,14 @@ function stockLevel(qty) {
 
 function formatProduct(row) {
   return {
-    sku:         row.sku,
-    name:        row.name,
-    brand:       row.brand_name,
-    category:    row.category_name,
-    price_cents: row.price_cents,
-    stock_level: stockLevel(row.stock_qty),
-    stock_qty:   row.stock_qty,
+    sku:          row.sku,
+    name:         row.name,
+    brand:        row.brand_name,
+    category:     row.category_name,
+    price_cents:  row.price_cents,
+    discount_pct: row.discount_pct ?? null,
+    stock_level:  stockLevel(row.stock_qty),
+    stock_qty:    row.stock_qty,
   };
 }
 

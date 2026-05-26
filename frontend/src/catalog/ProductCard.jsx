@@ -39,9 +39,27 @@ export default function ProductCard({ product, onAddToCart, onDetail, outOfStock
         {product.brand} · {product.category}
       </div>
       <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', fontFamily: "'Barlow Condensed', sans-serif" }}>
-          {priceFmt(product.price_cents)}
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {product.discount_pct != null ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                  {priceFmt(product.price_cents)}
+                </span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--red)', borderRadius: 4, padding: '1px 5px' }}>
+                  -{Math.round(product.discount_pct * 100)}%
+                </span>
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {priceFmt(Math.round(product.price_cents * (1 - product.discount_pct)))}
+              </span>
+            </>
+          ) : (
+            <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent)', fontFamily: "'Barlow Condensed', sans-serif" }}>
+              {priceFmt(product.price_cents)}
+            </span>
+          )}
+        </div>
         <button
           className="btn-primary"
           disabled={isOut}

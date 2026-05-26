@@ -56,9 +56,21 @@ export default function OrderDetail({ order, onClose, onStatusChange }) {
                   {line.sku} · qty {line.quantity} · {priceFmt(line.unit_price_cents)} cad.
                 </div>
               </div>
-              <span style={{ color: 'var(--accent)', fontWeight: 700 }}>
-                {priceFmt(line.quantity * line.unit_price_cents)}
-              </span>
+              <div style={{ textAlign: 'right' }}>
+                {line.discount_pct != null && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
+                    <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)', fontSize: 12 }}>
+                      {priceFmt(line.quantity * line.unit_price_cents)}
+                    </span>
+                    <span style={{ background: 'var(--red)', color: '#fff', borderRadius: 4, padding: '1px 5px', fontSize: 10, fontWeight: 700 }}>
+                      -{Math.round(line.discount_pct * 100)}%
+                    </span>
+                  </div>
+                )}
+                <span style={{ color: 'var(--accent)', fontWeight: 700 }}>
+                  {priceFmt(line.quantity * (line.final_price_cents ?? line.unit_price_cents))}
+                </span>
+              </div>
             </div>
           ))}
         </div>

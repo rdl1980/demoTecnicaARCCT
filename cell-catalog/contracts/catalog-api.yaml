@@ -140,6 +140,13 @@ components:
         price_cents:
           type: integer
           description: Prezzo di listino in centesimi
+        discount_pct:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          nullable: true
+          description: Sconto applicato al prodotto (0.15 = 15%). NULL se nessuno sconto.
         stock_level:
           type: string
           enum: [in_stock, low_stock, out_of_stock]
