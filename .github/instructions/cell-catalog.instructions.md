@@ -2,22 +2,22 @@
 applyTo: "cell-catalog/**"
 ---
 
-# Cell: Catalog — Regole Operative
+# Cell: Catalog — Operating Rules
 
-**Porta**: 3001 | **DB**: `cell-catalog/db/catalog.db`
+**Port**: 3001 | **DB**: `cell-catalog/db/catalog.db`
 
-## Responsabilità
-Prodotti, categorie, brand, compatibilità, stock. Nient'altro.
+## Responsibilities
+Products, categories, brands, compatibility, stock. Nothing else.
 
-## Vincoli
-- NON toccare `cell-orders/` o `frontend/`
-- NON creare endpoint per ordini, carrello, sconti, autenticazione
-- NON leggere `orders.db`
-- Prezzi = centesimi interi
-- SKU formato: `CAT-XXXXX`
+## Constraints
+- DO NOT touch `cell-orders/` or `frontend/`
+- DO NOT create endpoints for orders, cart, discounts, or authentication
+- DO NOT read `orders.db`
+- Prices = integer cents
+- SKU format: `CAT-XXXXX`
 
 ## Stock Logic
-`low_stock` se qty < 5 | `out_of_stock` se qty = 0
+`low_stock` if qty < 5 | `out_of_stock` if qty = 0
 
 ## API
 ```
@@ -29,4 +29,4 @@ POST /api/catalog/products/stock-check
 ```
 
 ## Tech
-Express su porta 3001 | `better-sqlite3`, no ORM | Contratto: `contracts/catalog-api.yaml`
+Express on port 3001 | `better-sqlite3`, no ORM | Contract: `contracts/catalog-api.yaml`

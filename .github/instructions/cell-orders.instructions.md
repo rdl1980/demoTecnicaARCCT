@@ -2,23 +2,23 @@
 applyTo: "cell-orders/**"
 ---
 
-# Cell: Orders — Regole Operative
+# Cell: Orders — Operating Rules
 
-**Porta**: 3002 | **DB**: `cell-orders/db/orders.db`
+**Port**: 3002 | **DB**: `cell-orders/db/orders.db`
 
-## Responsabilità
-Carrello, checkout, ordini, stati. Nient'altro.
+## Responsibilities
+Cart, checkout, orders, status transitions. Nothing else.
 
-## Vincoli
-- NON toccare `cell-catalog/` o `frontend/`
-- NON creare endpoint per ricerca prodotti
-- NON leggere `catalog.db`, NON chiamare le API di catalog
-- Prezzi = centesimi interi (`price_snapshot` immutabile dopo checkout)
-- Demo: `customer_id` = `"demo-user"` sempre
+## Constraints
+- DO NOT touch `cell-catalog/` or `frontend/`
+- DO NOT create product search endpoints
+- DO NOT read `catalog.db`, DO NOT call catalog APIs
+- Prices = integer cents (`price_snapshot` immutable after checkout)
+- Demo: `customer_id` = `"demo-user"` always
 
-## Transizioni Stato
+## Status Transitions
 `pending → confirmed → shipped → delivered` | `pending|confirmed → cancelled`
-`shipped` / `delivered` / `cancelled` non cancellabili.
+`shipped` / `delivered` / `cancelled` cannot be cancelled.
 
 ## API
 ```
@@ -32,4 +32,4 @@ PATCH  /api/orders/:id/status
 ```
 
 ## Tech
-Express su porta 3002 | `better-sqlite3`, no ORM | Contratto: `contracts/orders-api.yaml`
+Express on port 3002 | `better-sqlite3`, no ORM | Contract: `contracts/orders-api.yaml`

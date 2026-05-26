@@ -169,53 +169,53 @@ Tutti i prezzi sono **interi in centesimi** (es: €19,99 = 1999 centesimi).
 - **API Spec**: OpenAPI 3.0 YAML
 - **Runtime**: Node.js 22+
 
-## 📋 Requisiti in Corso
+## 📋 Ongoing Requirements
 
-### Feature: Sconti sui Prodotti
-- Aggiungere percentuale di sconto come proprietà del prodotto
-- Mostrare prezzo originale, sconto e prezzo finale al checkout
-- Visibilità dello sconto nel catalogo
-- Persistenza in decimali
+### Feature: Product Discounts
+- Add discount percentage as a product property
+- Show original price, discount and final price at checkout
+- Discount visibility in the catalog
+- Persist as decimal
 
-**Status**: Pianificato
+**Status**: Planned
 
-## 🤝 Come Contribuire
+## 🤝 How to Contribute
 
-### Per aggiungere una feature
+### Adding a feature
 
-1. **Scegli la cell** che la contiene (catalog vs orders)
-2. **Aggiorna il contratto OpenAPI** nella cell: `contracts/*.yaml`
-3. **Implementa il backend** nella cell: `backend/routes/*.js`
-4. **Aggiorna lo schema** se necessario: `db/schema.sql`
-5. **Implementa il frontend** in `frontend/src/`
-6. **Testa** avviando `npm run dev` e verificando il flusso end-to-end
+1. **Pick the cell** that owns it (catalog vs orders)
+2. **Update the OpenAPI contract** in the cell: `contracts/*.yaml`
+3. **Implement the backend** in the cell: `backend/routes/*.js`
+4. **Update the schema** if needed: `db/schema.sql`
+5. **Implement the frontend** in `frontend/src/`
+6. **Test** by running `npm run dev` and verifying the end-to-end flow
 
-### Principi per le modifiche
+### Change principles
 
-- **Una cell per volta**: Non mescolare logica di catalog e orders
-- **Denormalizza intelligentemente**: Passa dati dal frontend alle cell, non fare join tra celle
-- **Contatti espliciti**: Qualsiasi cambio API deve aggiornare lo YAML
-- **Test manuale**: Non c'è suite di test automatici; testa via browser
+- **One cell at a time**: Don't mix catalog and orders logic
+- **Denormalize intentionally**: Pass data from the frontend to cells, don't cross-join cells
+- **Explicit contracts**: Any API change must update the YAML
+- **Manual testing**: No automated test suite; test via browser
 
-### Workflow per Pull Request
+### Pull Request workflow
 
 ```bash
-# 1. Crea un branch
-git checkout -b feature/nome-feature
+# 1. Create a branch
+git checkout -b feature/my-feature-name
 
-# 2. Fai le modifiche seguendo i principi sopra
-# 3. Verifica il funzionamento
+# 2. Make changes following the principles above
+# 3. Verify everything works
 npm run dev
 
-# 4. Commit con messaggio descrittivo
+# 4. Commit with a descriptive message
 git add .
 git commit -m "feat(cell-orders): add discount snapshot to order lines"
 
-# 5. Push e apri PR
-git push origin feature/nome-feature
+# 5. Push and open PR
+git push origin feature/my-feature-name
 ```
 
-## 📖 Documentazione Aggiuntiva
+## 📖 Additional Documentation
 
 - [cell-catalog/CELL.md](cell-catalog/CELL.md) — Dominio Catalog
 - [cell-orders/CELL.md](cell-orders/CELL.md) — Dominio Orders
@@ -225,17 +225,17 @@ git push origin feature/nome-feature
 
 ## 🔍 Token Usage Analytics
 
-Confronta il consumo di token tra architettura monolitica vs cell-based:
+Compare token consumption between monolithic vs cell-based architecture:
 
 ```bash
 npm run token-stats
 ```
 
-## 📝 Licenza
+## 📝 License
 
-Demo per scopi educativi e dimostrativi.
+Demo project for educational and demonstration purposes.
 
 ---
 
-**Mantenuto da**: AgriParts Development Team  
-**Ultima modifica**: Maggio 2026
+**Maintained by**: AgriParts Development Team  
+**Last updated**: May 2026

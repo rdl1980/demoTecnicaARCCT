@@ -1,40 +1,40 @@
 # CLAUDE.md
 
-## Principi
+## Principles
 
-1. **Pensa prima di scrivere** — Esplicita assunzioni, chiedi se è ambiguo, proponi l'alternativa più semplice.
-2. **Minimo indispensabile** — Niente feature non richieste, niente astrazioni per uso singolo, niente error handling impossibili.
-3. **Modifiche chirurgiche** — Tocca solo il necessario. Non migliorare codice adiacente. Ogni riga modificata deve tracciare al requisito.
-4. **Criteri di successo verificabili** — Prima di implementare, definisci come verifichi che funzioni.
+1. **Think before coding** — State assumptions explicitly, ask when ambiguous, propose the simplest alternative.
+2. **Minimum necessary** — No unrequested features, no single-use abstractions, no error handling for impossible scenarios.
+3. **Surgical changes** — Touch only what's needed. Don't improve adjacent code. Every changed line must trace to a requirement.
+4. **Verifiable success criteria** — Before implementing, define how you'll verify it works.
 
-## Comandi
+## Commands
 
 ```bash
-npm run install:all   # dipendenze ovunque
-npm run db:init       # crea schema DB (una volta)
-npm run db:seed       # popola con dati demo
-npm run dev           # avvia tutto (catalog :3001, orders :3002, frontend :5200)
-npm run token-stats   # confronto token monolith vs cell
+npm run install:all   # install dependencies everywhere
+npm run db:init       # create DB schema (once)
+npm run db:seed       # populate with demo data
+npm run dev           # start everything (catalog :3001, orders :3002, frontend :5200)
+npm run token-stats   # compare token usage monolith vs cell
 ```
 
-No test suite configurata.
+No test suite configured.
 
-## Architettura
+## Architecture
 
-Demo **cell-based** per un e-commerce di ricambi agricoli (AgriParts).  
-Ogni cell = slice verticale isolata con DB, backend e contratto API propri.  
-Le cell non si chiamano mai — la SPA React orchestra tra di loro.
+**Cell-based** demo for an agricultural parts e-commerce (AgriParts).  
+Each cell = isolated vertical slice with its own DB, backend, and API contract.  
+Cells never call each other — the React SPA orchestrates across them.
 
 ```
-cell-catalog/   → port 3001  (prodotti, stock, categorie)
-cell-orders/    → port 3002  (carrello, ordini, stati)
+cell-catalog/   → port 3001  (products, stock, categories)
+cell-orders/    → port 3002  (cart, orders, statuses)
 frontend/       → port 5200  (React + Vite)
-scripts/        → init/seed DB
+scripts/        → DB init/seed
 ```
 
-**Stack per ogni cell**: Express · SQLite (Node 22 DatabaseSync, no ORM) · OpenAPI 3.0 YAML  
-**Prezzi**: centesimi interi · **Proxy Vite**: `/api/catalog` → :3001, `/api/orders` → :3002
+**Stack per cell**: Express · SQLite (Node 22 DatabaseSync, no ORM) · OpenAPI 3.0 YAML  
+**Prices**: integer cents · **Vite Proxy**: `/api/catalog` → :3001, `/api/orders` → :3002
 
-**Regola chiave**: La SPA chiama `POST /api/catalog/products/stock-check` prima del checkout. Le cell non si cross-validano.
+**Key rule**: The SPA calls `POST /api/catalog/products/stock-check` before checkout. Cells do not cross-validate.
 
-> Dettagli dominio per cell: vedi `.github/instructions/cell-catalog.instructions.md` e `cell-orders.instructions.md`
+> Cell domain details: see `.github/instructions/cell-catalog.instructions.md` and `cell-orders.instructions.md`
