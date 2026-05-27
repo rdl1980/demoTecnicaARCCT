@@ -48,7 +48,6 @@ export default function CatalogPage({ onCartChange }) {
         product_name: product.name,
         quantity,
         unit_price_cents: product.price_cents,
-        ...(product.discount_pct != null && { discount_pct: product.discount_pct }),
       }),
     }).then(() => onCartChange());
   }

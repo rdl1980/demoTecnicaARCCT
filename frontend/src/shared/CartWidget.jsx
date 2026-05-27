@@ -102,21 +102,9 @@ export default function CartWidget({ onClose, onCartChange, cartVersion }) {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-muted)' }}>
                       <span>{item.sku} · qty {item.quantity}</span>
-                      <div style={{ textAlign: 'right' }}>
-                        {item.discount_pct != null && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
-                            <span style={{ textDecoration: 'line-through', color: 'var(--text-muted)' }}>
-                              € {((item.quantity * item.unit_price_cents) / 100).toFixed(2).replace('.', ',')}
-                            </span>
-                            <span style={{ background: 'var(--red)', color: '#fff', borderRadius: 4, padding: '1px 5px', fontSize: 10, fontWeight: 700 }}>
-                              -{Math.round(item.discount_pct * 100)}%
-                            </span>
-                          </div>
-                        )}
-                        <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
-                          € {((item.quantity * (item.final_price_cents ?? item.unit_price_cents)) / 100).toFixed(2).replace('.', ',')}
-                        </span>
-                      </div>
+                      <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
+                        € {((item.quantity * item.unit_price_cents) / 100).toFixed(2).replace('.', ',')}
+                      </span>
                     </div>
                     {isUnavail && (
                       <div style={{ color: 'var(--red)', fontSize: 12, marginTop: 4 }}>

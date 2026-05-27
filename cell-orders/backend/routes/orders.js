@@ -25,7 +25,7 @@ function getOrCreateCart(db) {
 
 function buildCartResponse(db, cart) {
   const items = db.prepare('SELECT * FROM cart_items WHERE cart_id = ?').all(cart.id);
-  const total_cents = items.reduce((sum, i) => sum + i.quantity * (i.final_price_cents ?? i.unit_price_cents), 0);
+  const total_cents = items.reduce((sum, i) => sum + i.quantity * i.unit_price_cents, 0);
   return { customer_id: CUSTOMER_ID, items, total_cents };
 }
 
@@ -38,7 +38,7 @@ router.get('/cart', (req, res) => {
 
 // POST /api/orders/cart/items
 router.post('/cart/items', (req, res) => {
-  const { sku, product_name, quantity, unit_price_cents, discount_pct } = req.body;
+  const { sku, product_name, quantity, unit_price_cents } = req.body;
   if (!sku || !product_name || !quantity || !unit_price_cents) {
     return res.status(400).json({ error: 'sku, product_name, quantity, unit_price_cents required' });
   }
@@ -51,13 +51,8 @@ router.post('/cart/items', (req, res) => {
     db.prepare('UPDATE cart_items SET quantity = quantity + ? WHERE cart_id = ? AND sku = ?')
       .run(quantity, cart.id, sku);
   } else {
-    const pct = (discount_pct != null) ? discount_pct : null;
-    const final_price_cents = (pct != null)
-      ? Math.round(unit_price_cents * (1 - pct))
-      : unit_price_cents;
-    db.prepare(
-      'INSERT INTO cart_items (cart_id, sku, product_name, quantity, unit_price_cents, discount_pct, final_price_cents) VALUES (?,?,?,?,?,?,?)'
-    ).run(cart.id, sku, product_name, quantity, unit_price_cents, pct, final_price_cents);
+    db.prepare('INSERT INTO cart_items (cart_id, sku, product_name, quantity, unit_price_cents) VALUES (?,?,?,?,?)')
+      .run(cart.id, sku, product_name, quantity, unit_price_cents);
   }
 
   res.json(buildCartResponse(db, cart));
@@ -81,7 +76,7 @@ router.post('/checkout', (req, res) => {
     return res.status(400).json({ error: 'Cart is empty' });
   }
 
-  const total_cents = items.reduce((sum, i) => sum + i.quantity * (i.final_price_cents ?? i.unit_price_cents), 0);
+  const total_cents = items.reduce((sum, i) => sum + i.quantity * i.unit_price_cents, 0);
 
   let order;
   db.exec('BEGIN');
@@ -93,8 +88,8 @@ router.post('/checkout', (req, res) => {
     const orderId = Number(result.lastInsertRowid);
     for (const item of items) {
       db.prepare(
-        'INSERT INTO order_lines (order_id, sku, product_name, quantity, unit_price_cents, discount_pct, final_price_cents) VALUES (?,?,?,?,?,?,?)'
-      ).run(orderId, item.sku, item.product_name, item.quantity, item.unit_price_cents, item.discount_pct ?? null, item.final_price_cents ?? item.unit_price_cents);
+        'INSERT INTO order_lines (order_id, sku, product_name, quantity, unit_price_cents) VALUES (?,?,?,?,?)'
+      ).run(orderId, item.sku, item.product_name, item.quantity, item.unit_price_cents);
     }
 
     db.prepare('DELETE FROM cart_items WHERE cart_id = ?').run(cart.id);
