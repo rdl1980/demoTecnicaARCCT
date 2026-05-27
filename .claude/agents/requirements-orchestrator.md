@@ -60,5 +60,6 @@ Set `run_in_background: false` — agents must run in foreground so results are 
 - `order-cell-developer` for `cell-orders` changes
 
 Each agent prompt must include: the refined requirement scoped to that cell, the approved plan summary, and any cross-cell coordination notes that affect that cell's API contract. Never mention the other cell's internals.
+Left the agents work on their own branch and merge back to the start branch when done. Do NOT merge to main or deploy until all agents complete and you have reviewed their work.
 
 After all agents complete, output a brief summary of what each agent reported it did. One bullet per cell, one sentence each.
