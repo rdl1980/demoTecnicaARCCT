@@ -1,19 +1,19 @@
 # AgriParts — Cell Architecture Demo
 
-Una demo funzionale di **architettura cell-based** per un e-commerce di ricambi agricoli. Ogni "cell" è una fetta verticale completamente isolata con il proprio database, backend e contratto API OpenAPI 3.0.
+A functional demonstration of **cell-based architecture** for an agricultural parts e-commerce platform. Each "cell" is a completely isolated vertical slice with its own database, backend, and OpenAPI 3.0 contract.
 
-## 🎯 Cosa è questo progetto?
+## 🎯 What is this project?
 
-AgriParts dimostra come progettare sistemi scalabili usando il **Cell Pattern**:
-- **Isolamento**: Ogni cell ha database indipendente (SQLite)
-- **Autonomia**: Le cell non si chiamano mai direttamente; il frontend le orchiestra
-- **Contratti espliciti**: OpenAPI 3.0 per ogni cell definisce il confine
-- **Denormalizzazione intelligente**: Il frontend passa prezzo/nome nel carrello; la cell-orders non dipende da catalog
+AgriParts demonstrates how to design scalable systems using the **Cell Pattern**:
+- **Isolation**: Each cell has an independent database (SQLite)
+- **Autonomy**: Cells never call each other directly; the frontend orchestrates them
+- **Explicit Contracts**: OpenAPI 3.0 for each cell defines the boundary
+- **Intelligent Denormalization**: The frontend passes price/name to the cart; cell-orders has no dependency on catalog
 
-## 📦 Architettura
+## 📦 Architecture
 
 ```
-cell-catalog/        → Catalogo prodotti (porta 3001)
+cell-catalog/        → Product catalog (port 3001)
   ├── backend/
   │   ├── index.js
   │   ├── db.js (SQLite)
@@ -21,7 +21,7 @@ cell-catalog/        → Catalogo prodotti (porta 3001)
   ├── contracts/catalog-api.yaml
   └── db/schema.sql + seed
 
-cell-orders/         → Carrello & Ordini (porta 3002)
+cell-orders/         → Cart & Orders (port 3002)
   ├── backend/
   │   ├── index.js
   │   ├── db.js (SQLite)
@@ -29,126 +29,126 @@ cell-orders/         → Carrello & Ordini (porta 3002)
   ├── contracts/orders-api.yaml
   └── db/schema.sql + seed
 
-frontend/            → React + Vite SPA (porta 5200)
+frontend/            → React + Vite SPA (port 5200)
   ├── src/
   │   ├── catalog/
   │   ├── orders/
   │   └── shared/
   └── vite.config.js
 
-scripts/             → Utilità per init/seed database
+scripts/             → Database initialization & seeding utilities
 ```
 
 ## 🚀 Quick Start
 
-### Prerequisiti
+### Prerequisites
 - Node.js 22+
 - npm 10+
 
-### Installazione e Setup
+### Installation & Setup
 
 ```bash
-# 1. Installa dipendenze (root + tutte le cell + frontend)
+# 1. Install dependencies (root + all cells + frontend)
 npm run install:all
 
-# 2. Inizializza i database (esegui una sola volta)
+# 2. Initialize databases (run once)
 npm run db:init
 
-# 3. Popola i database con dati demo
+# 3. Populate databases with demo data
 npm run db:seed
 
-# 4. Avvia tutto in concorrenza
+# 4. Start everything concurrently
 npm run dev
 ```
 
-L'applicazione sarà disponibile su:
+The application will be available at:
 - **Frontend**: http://localhost:5200
 - **Catalog API**: http://localhost:3001
 - **Orders API**: http://localhost:3002
 
-### Comandi disponibili
+### Available Commands
 
 ```bash
-npm run install:all      # Installa dipendenze ovunque
-npm run db:init          # Crea gli schema dei database
-npm run db:seed          # Popola i database con seed
-npm run dev              # Avvia tutto (catalog, orders, frontend)
-npm run dev:catalog      # Solo cell-catalog
-npm run dev:orders       # Solo cell-orders
-npm run dev:frontend     # Solo SPA frontend
-npm run token-stats      # Analizza token usage monolith vs cell
+npm run install:all      # Install dependencies everywhere
+npm run db:init          # Create database schemas
+npm run db:seed          # Populate databases with seed data
+npm run dev              # Start everything (catalog, orders, frontend)
+npm run dev:catalog      # Catalog cell only
+npm run dev:orders       # Orders cell only
+npm run dev:frontend     # Frontend SPA only
+npm run token-stats      # Analyze token usage: monolith vs cell
 ```
 
-## 📚 Struttura Dominio
+## 📚 Domain Structure
 
 ### Cell: Catalog (cell-catalog/)
 
-Gestisce il catalogo prodotti con ricerca, filtri e verifiche di stock.
+Manages product catalog with search, filtering, and stock verification.
 
-**Modello di Dominio:**
-- **Product**: Pezzo di ricambio con SKU univoco (formato: CAT-XXXXX)
-- **Category**: Raggruppamento logico (Motore, Idraulica, Trasmissione, Elettrica, Carrozzeria)
-- **Brand**: Produttore (SAME, Deutz-Fahr, Fendt, John Deere, New Holland, Lamborghini Trattori)
-- **Compatibility**: Modelli di macchina compatibili con il prodotto
+**Domain Model:**
+- **Product**: Replacement part with unique SKU (format: CAT-XXXXX)
+- **Category**: Logical grouping (Engine, Hydraulics, Transmission, Electrical, Body)
+- **Brand**: Manufacturer (SAME, Deutz-Fahr, Fendt, John Deere, New Holland, Lamborghini Trattori)
+- **Compatibility**: Machine models compatible with the product
 - **StockLevel**: in_stock | low_stock (qty < 5) | out_of_stock (qty = 0)
 
 **API Endpoints:**
 ```
-GET    /api/catalog/products              # Lista prodotti con filtri
-GET    /api/catalog/products/:sku         # Dettagli prodotto
-GET    /api/catalog/categories            # Liste di categorie
-GET    /api/catalog/products/:sku/stock   # Livello stock
-POST   /api/catalog/products/stock-check  # Verifica batch pre-checkout
+GET    /api/catalog/products              # List products with filters
+GET    /api/catalog/products/:sku         # Product details
+GET    /api/catalog/categories            # Category list
+GET    /api/catalog/products/:sku/stock   # Stock level
+POST   /api/catalog/products/stock-check  # Batch stock check before checkout
 ```
 
-**Confini della Cell:**
-- ✅ Gestisce: Prodotti, categorie, brand, compatibilità, stock
-- ❌ Non gestisce: Sconti, ordini, carrello, utenti, autenticazione
+**Cell Boundaries:**
+- ✅ Manages: Products, categories, brands, compatibility, stock
+- ❌ Does not manage: Discounts, orders, cart, users, authentication
 
-Vedi [cell-catalog/CELL.md](cell-catalog/CELL.md) per dettagli.
+See [cell-catalog/CELL.md](cell-catalog/CELL.md) for details.
 
 ### Cell: Orders (cell-orders/)
 
-Gestisce carrello, checkout e ciclo di vita degli ordini.
+Manages shopping cart, checkout, and order lifecycle.
 
-**Modello di Dominio:**
-- **Cart**: Raccolta temporanea di CartItem per customer
-- **CartItem**: SKU, quantità, prezzo snapshot, nome prodotto
-- **Order**: Carrello confermato e immutabile
-- **OrderLine**: Riga di un ordine confermato
-- **OrderStatus**: pending → confirmed → shipped → delivered (oppure cancelled)
+**Domain Model:**
+- **Cart**: Temporary collection of CartItems for a customer
+- **CartItem**: SKU, quantity, price snapshot, product name
+- **Order**: Confirmed and immutable cart
+- **OrderLine**: Line item in a confirmed order
+- **OrderStatus**: pending → confirmed → shipped → delivered (or cancelled)
 
 **API Endpoints:**
 ```
-GET    /api/orders/cart               # Recupera carrello attuale
-POST   /api/orders/cart/items         # Aggiunge prodotto al carrello
-DELETE /api/orders/cart/items/:sku    # Rimuove dal carrello
-POST   /api/orders/checkout           # Conferma e crea ordine
-GET    /api/orders                    # Lista ordini del customer
-GET    /api/orders/:id                # Dettagli ordine
-PATCH  /api/orders/:id/status         # Cambia stato ordine
+GET    /api/orders/cart               # Retrieve current cart
+POST   /api/orders/cart/items         # Add product to cart
+DELETE /api/orders/cart/items/:sku    # Remove from cart
+POST   /api/orders/checkout           # Confirm and create order
+GET    /api/orders                    # List customer orders
+GET    /api/orders/:id                # Order details
+PATCH  /api/orders/:id/status         # Change order status
 ```
 
-**Regole di Business:**
-- Il carrello → ordine solo tramite checkout
-- Il prezzo è congelato al momento dell'ordine (price_snapshot immutabile)
-- La cell NON valida stock; la SPA chiama catalog/stock-check prima del checkout
+**Business Rules:**
+- Cart → Order only through checkout
+- Price is frozen at order time (price_snapshot immutable)
+- Cell does NOT validate stock; SPA calls catalog/stock-check before checkout
 - Demo: customer_id = "demo-user"
 
-**Confini della Cell:**
-- ✅ Gestisce: Carrello, ordini, status
-- ❌ Non gestisce: Catalogo, ricerca, dettagli prodotto, autenticazione
+**Cell Boundaries:**
+- ✅ Manages: Cart, orders, status
+- ❌ Does not manage: Catalog, search, product details, authentication
 
-Vedi [cell-orders/CELL.md](cell-orders/CELL.md) per dettagli.
+See [cell-orders/CELL.md](cell-orders/CELL.md) for details.
 
 ## 💾 Database
 
 ### cell-catalog/db/catalog.db
 ```sql
-products              # SKU, nome, descrizione, prezzo, categoria, brand
-categories            # ID, nome
-brands                # ID, nome
-product_compatibility # Modelli di macchina compatibili
+products              # SKU, name, description, price, category, brand
+categories            # ID, name
+brands                # ID, name
+product_compatibility # Compatible machine models
 ```
 
 ### cell-orders/db/orders.db
@@ -159,7 +159,7 @@ orders                # ID, customer_id, status, total, created_at
 order_lines           # ID, order_id, sku, quantity, unit_price
 ```
 
-Tutti i prezzi sono **interi in centesimi** (es: €19,99 = 1999 centesimi).
+All prices are **integers in cents** (e.g.: €19.99 = 1999 cents).
 
 ## 🔧 Technology Stack
 
@@ -169,73 +169,73 @@ Tutti i prezzi sono **interi in centesimi** (es: €19,99 = 1999 centesimi).
 - **API Spec**: OpenAPI 3.0 YAML
 - **Runtime**: Node.js 22+
 
-## 📋 Requisiti in Corso
+## 📋 Backlog
 
-### Feature: Sconti sui Prodotti
-- Aggiungere percentuale di sconto come proprietà del prodotto
-- Mostrare prezzo originale, sconto e prezzo finale al checkout
-- Visibilità dello sconto nel catalogo
-- Persistenza in decimali
+### Feature: Product Discounts
+- Add discount percentage as product property
+- Show original price, discount, and final price at checkout
+- Display discount visibility in catalog
+- Persist as decimal
 
-**Status**: Pianificato
+**Status**: Planned
 
-## 🤝 Come Contribuire
+## 🤝 Contributing
 
-### Per aggiungere una feature
+### To add a feature
 
-1. **Scegli la cell** che la contiene (catalog vs orders)
-2. **Aggiorna il contratto OpenAPI** nella cell: `contracts/*.yaml`
-3. **Implementa il backend** nella cell: `backend/routes/*.js`
-4. **Aggiorna lo schema** se necessario: `db/schema.sql`
-5. **Implementa il frontend** in `frontend/src/`
-6. **Testa** avviando `npm run dev` e verificando il flusso end-to-end
+1. **Choose the cell** that owns it (catalog vs orders)
+2. **Update the OpenAPI contract** in the cell: `contracts/*.yaml`
+3. **Implement the backend** in the cell: `backend/routes/*.js`
+4. **Update the schema** if needed: `db/schema.sql`
+5. **Implement the frontend** in `frontend/src/`
+6. **Test** by running `npm run dev` and verifying the end-to-end flow
 
-### Principi per le modifiche
+### Principles for changes
 
-- **Una cell per volta**: Non mescolare logica di catalog e orders
-- **Denormalizza intelligentemente**: Passa dati dal frontend alle cell, non fare join tra celle
-- **Contatti espliciti**: Qualsiasi cambio API deve aggiornare lo YAML
-- **Test manuale**: Non c'è suite di test automatici; testa via browser
+- **One cell at a time**: Don't mix catalog and orders logic
+- **Denormalize intelligently**: Pass data from frontend to cells, don't join between cells
+- **Explicit contracts**: Any API change must update the YAML
+- **Manual testing**: No automated test suite; test via browser
 
-### Workflow per Pull Request
+### Pull Request Workflow
 
 ```bash
-# 1. Crea un branch
-git checkout -b feature/nome-feature
+# 1. Create a branch
+git checkout -b feature/feature-name
 
-# 2. Fai le modifiche seguendo i principi sopra
-# 3. Verifica il funzionamento
+# 2. Make changes following the principles above
+# 3. Verify functionality
 npm run dev
 
-# 4. Commit con messaggio descrittivo
+# 4. Commit with a descriptive message
 git add .
 git commit -m "feat(cell-orders): add discount snapshot to order lines"
 
-# 5. Push e apri PR
-git push origin feature/nome-feature
+# 5. Push and open PR
+git push origin feature/feature-name
 ```
 
-## 📖 Documentazione Aggiuntiva
+## 📖 Additional Documentation
 
-- [cell-catalog/CELL.md](cell-catalog/CELL.md) — Dominio Catalog
-- [cell-orders/CELL.md](cell-orders/CELL.md) — Dominio Orders
-- [CLAUDE.md](CLAUDE.md) — Linee guida di sviluppo
+- [cell-catalog/CELL.md](cell-catalog/CELL.md) — Catalog Domain
+- [cell-orders/CELL.md](cell-orders/CELL.md) — Orders Domain
+- [CLAUDE.md](CLAUDE.md) — Development Guidelines
 - OpenAPI: [cell-catalog/contracts/catalog-api.yaml](cell-catalog/contracts/catalog-api.yaml)
 - OpenAPI: [cell-orders/contracts/orders-api.yaml](cell-orders/contracts/orders-api.yaml)
 
 ## 🔍 Token Usage Analytics
 
-Confronta il consumo di token tra architettura monolitica vs cell-based:
+Compare token consumption between monolithic vs cell-based architecture:
 
 ```bash
 npm run token-stats
 ```
 
-## 📝 Licenza
+## 📝 License
 
-Demo per scopi educativi e dimostrativi.
+Demo for educational and demonstration purposes.
 
 ---
 
-**Mantenuto da**: AgriParts Development Team  
-**Ultima modifica**: Maggio 2026
+**Maintained by**: AgriParts Development Team  
+**Last modified**: May 2026
