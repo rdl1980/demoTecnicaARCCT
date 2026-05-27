@@ -4,3 +4,6 @@ node_modules/
 **/*.db
 **/*.db-shm
 **/*.db-wal
+cell-catalog/db/
+cell-order/db/
+
